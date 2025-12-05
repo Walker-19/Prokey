@@ -1,0 +1,182 @@
+{% extends "layout/main.twig" %}
+
+{% block content %}
+<section class="p-8 max-w-3xl mx-auto">
+  <h2 class="text-3xl font-bold mb-6 text-gray-800">
+    Modifier le mot de passe : {{ password.label }}
+  </h2>
+
+  <form method="POST" 
+        action="{{ url('/projects/' ~ project_id ~ '/passwords/' ~ password.id ~ '/update') }}"
+        class="bg-white p-6 rounded-lg shadow-md space-y-5"
+        enctype="multipart/form-data">
+
+    <!-- Libellé -->
+    <div>
+      <label for="label" class="block mb-2 font-semibold text-gray-700">Libellé :</label>
+      <input type="text" id="label" name="label" value="{{ password.label }}" required
+             class="w-full border border-gray-300 rounded-lg p-2 focus:ring focus:ring-blue-300">
+    </div>
+
+    <!-- Type de mot de passe -->
+    <div>
+      <label for="password_type_id" class="block mb-2 font-semibold text-gray-700">Type de mot de passe :</label>
+      <select id="password_type_id" name="password_type_id" required
+              onchange="updatePasswordTypeFields()"
+              class="w-full border border-gray-300 rounded-lg p-2 focus:ring focus:ring-blue-300">
+        {% for type in password_types %}
+          <option value="{{ type.id }}" {% if type.id == password.type_id %}selected{% endif %}>
+            {{ type.label }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Champs dynamiques -->
+    <div id="fields-container">
+      {% for field in fields %}
+        <div class="field-group">
+          <label class="block mb-2 font-semibold text-gray-700">
+            {{ field.field_label }} :
+          </label>
+
+          {% if field.field_type == 'textarea' %}
+            <textarea name="extra[{{ field.field_name }}]" 
+                      class="w-full border border-gray-300 rounded-lg p-2 focus:ring focus:ring-blue-300"
+                      rows="3">{{ extra[field.field_name]|default('') }}</textarea>
+          {% elseif field.field_type == 'password' %}
+            <div class="flex gap-2">
+              <input type="text" 
+                   id="pw_{{ field.field_name }}"
+                   name="extra[{{ field.field_name }}]" 
+                   value="{{ extra[field.field_name]|default('') }}"
+                   class="flex-1 border border-gray-300 rounded-lg p-2 focus:ring focus:ring-blue-300">
+              <button type="button"
+                      class="px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition"
+                      onclick="generatePassword('pw_{{ field.field_name }}')">
+                  <i class="mdi mdi-refresh"></i> Générer
+              </button>
+            </div>
+          {% else %}
+            <input type="{{ field.field_type }}" 
+                   name="extra[{{ field.field_name }}]" 
+                   value="{{ extra[field.field_name]|default('') }}"
+                   class="w-full border border-gray-300 rounded-lg p-2 focus:ring focus:ring-blue-300">
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+
+    <div>
+      <label class="block mb-2 font-semibold text-gray-700" for="multiple_files">Ajouter des fichiers</label>
+      <input class="cursor-pointer block w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring focus:ring-blue-300" name="files[]" id="multiple_files" type="file" multiple>
+    </div>
+
+    <div class="pt-4 flex gap-2">
+      <button type="submit"
+              class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition flex items-center gap-2">
+        <i class="mdi mdi-check"></i> Mettre à jour le mot de passe
+      </button>
+      <a href="{{ url('/projects/' ~ project_id ~ '/show') }}" 
+         class="bg-gray-600 text-white px-6 py-2 rounded-lg hover:bg-gray-700 transition flex items-center gap-2">
+        <i class="mdi mdi-close"></i> Annuler
+      </a>
+    </div>
+  </form>
+</section>
+
+<script>
+  function updatePasswordTypeFields() {
+    const typeId = document.getElementById('password_type_id').value;
+    
+    // Faire une requête pour récupérer les champs du nouveau type
+    fetch(`{{ url('/password-types') }}/${typeId}/fields/api`)
+      .then(response => response.text())
+      .then(html => {
+        // Parser le HTML pour extraire les champs
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+        const fieldsTable = doc.querySelector('table tbody');
+        
+        if (fieldsTable) {
+          generateFieldsFromTable(fieldsTable);
+        }
+      })
+      .catch(error => console.error('Erreur:', error));
+  }
+
+  function generateFieldsFromTable(fieldsTable) {
+    const container = document.getElementById('fields-container');
+    container.innerHTML = '';
+    
+    const rows = fieldsTable.querySelectorAll('tr');
+    
+    rows.forEach(row => {
+      const cells = row.querySelectorAll('td');
+      if (cells.length >= 3) {
+        const fieldName = cells[0].textContent.trim();
+        const fieldLabel = cells[1].textContent.trim();
+        const fieldTypeText = cells[2].textContent.trim().toLowerCase();
+        
+        // Déterminer le type réel du champ
+        let fieldType = 'text';
+        if (fieldTypeText.includes('password')) fieldType = 'password';
+        else if (fieldTypeText.includes('textarea')) fieldType = 'textarea';
+        else if (fieldTypeText.includes('email')) fieldType = 'email';
+        else if (fieldTypeText.includes('url')) fieldType = 'url';
+        else if (fieldTypeText.includes('number')) fieldType = 'number';
+        else if (fieldTypeText.includes('date')) fieldType = 'date';
+        
+        const fieldDiv = createFieldElement(fieldName, fieldLabel, fieldType);
+        container.appendChild(fieldDiv);
+      }
+    });
+  }
+
+  function createFieldElement(fieldName, fieldLabel, fieldType) {
+    const div = document.createElement('div');
+    div.className = 'field-group mb-5';
+    
+    const label = document.createElement('label');
+    label.className = 'block mb-2 font-semibold text-gray-700';
+    label.textContent = fieldLabel + ' :';
+    
+    div.appendChild(label);
+    
+    if (fieldType === 'textarea') {
+      const textarea = document.createElement('textarea');
+      textarea.name = `extra[${fieldName}]`;
+      textarea.className = 'w-full border border-gray-300 rounded-lg p-2 focus:ring focus:ring-blue-300';
+      textarea.rows = 3;
+      div.appendChild(textarea);
+    } else if (fieldType === 'password') {
+      const inputDiv = document.createElement('div');
+      inputDiv.className = 'flex gap-2';
+      
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.id = `pw_${fieldName}`;
+      input.name = `extra[${fieldName}]`;
+      input.className = 'flex-1 border border-gray-300 rounded-lg p-2 focus:ring focus:ring-blue-300';
+      
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'px-3 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition';
+      button.innerHTML = '<i class="mdi mdi-refresh"></i> Générer';
+      button.onclick = () => generatePassword(`pw_${fieldName}`);
+      
+      inputDiv.appendChild(input);
+      inputDiv.appendChild(button);
+      div.appendChild(inputDiv);
+    } else {
+      const input = document.createElement('input');
+      input.type = fieldType;
+      input.name = `extra[${fieldName}]`;
+      input.className = 'w-full border border-gray-300 rounded-lg p-2 focus:ring focus:ring-blue-300';
+      div.appendChild(input);
+    }
+    
+    return div;
+  }
+</script>
+{% endblock %}

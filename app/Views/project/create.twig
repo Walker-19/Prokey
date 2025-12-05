@@ -1,0 +1,32 @@
+{% extends "layout/main.twig" %}
+
+{% block content %}
+  <section class="p-8 max-w-2xl mx-auto">
+    <h2 class="text-3xl font-bold mb-6 text-gray-800">
+      Créer un projet
+    </h2>
+
+    <form action="{{ url('/projects') }}" method="POST" class="space-y-5 bg-white p-6 rounded-lg shadow-md">
+      
+      <div>
+        <label for="name" class="block mb-2 font-semibold text-gray-700">Nom du projet :</label>
+        <input type="text" id="name" name="name" 
+               required
+               class="w-full border border-gray-300 rounded-lg p-2 focus:ring focus:ring-blue-300">
+      </div>
+
+      <div>
+        <label for="description" class="block mb-2 font-semibold text-gray-700">Description :</label>
+        <textarea id="description" name="description" rows="4" required
+                  class="w-full border border-gray-300 rounded-lg p-2 focus:ring focus:ring-blue-300"></textarea>
+      </div>
+
+      <div class="pt-4">
+        <button type="submit"
+                class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">
+          Créer le projet
+        </button>
+      </div>
+    </form>
+  </section>
+{% endblock %}

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/mdi-icons@1.0.1/css/materialdesignicons.min.css">
+    <title>Prokey</title>
+</head>
+<body>
+   {% include 'partials/notifications.twig' %} 
+   {% include 'partials/header.twig' %} 
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+    <footer>
+        <p>&copy; 2024 Prokey</p>
+        <script>
+            function toggleField(btn) {
+                const line = btn.closest('.field-line');
+                const mask = line.querySelector('.hidden-mask');
+                const value = line.querySelector('.hidden-value');
+                
+                if (value.classList.contains('hidden')) {
+                    value.classList.remove('hidden');
+                    mask.classList.add('hidden');
+                    btn.innerHTML = '<i class="mdi mdi-eye-off"></i> Masquer';
+                } else {
+                    value.classList.add('hidden');
+                    mask.classList.remove('hidden');
+                    btn.innerHTML = '<i class="mdi mdi-eye"></i> Afficher';
+                }
+            }
+
+            function copyField(btn) {
+                const value = btn.dataset.value; // récupération de la valeur d’origine
+
+                // API moderne du navigateur
+                if(!navigator.clipboard) {
+                      // Créer un textarea temporaire pour copier
+                        const textarea = document.createElement("textarea");
+                        textarea.value = value;
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand("copy");
+                        document.body.removeChild(textarea);
+
+                        // Ajouter un span avec icône
+                        const span = document.createElement("span");
+                        span.classList.add("mdi", "mdi-check-circle"); // correction ici
+                        span.style.marginLeft = "5px";
+
+                        // Modifier le texte du bouton et ajouter l’icône
+                        btn.textContent = "Copié !";
+                        btn.appendChild(span);
+
+                        // Optionnel : réinitialiser le bouton après 2 secondes
+                        setTimeout(() => {
+                            btn.textContent = "Copier";
+                        }, 2000);;
+                    return;
+                }
+                navigator.clipboard.writeText(value)
+                    .then(() => {
+                        btn.innerText = "Copié !";
+                        btn.style.color = "green";
+
+                        // Retour à "Copier" après 1 seconde
+                        setTimeout(() => {
+                            btn.innerText = "Copier";
+                            btn.style.color = "";
+                        }, 1000);
+                    })
+                    .catch(err => {
+                        console.error("Erreur copie", err);
+                        alert("Impossible de copier.");
+                    });
+            }
+
+            function generatePassword(targetId) {
+                const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%&*?";
+                let pwd = "";
+
+                for (let i = 0; i < 12; i++) {
+                    pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+
+                document.getElementById(targetId).value = pwd;
+            }
+
+            function togglePasswordTypesMenu(event) {
+                event.preventDefault();
+                const dropdown = document.getElementById('password-types-dropdown');
+                dropdown.classList.toggle('hidden');
+            }
+
+            // Fermer le dropdown quand on clique ailleurs
+            document.addEventListener('click', function(event) {
+                const menu = document.getElementById('password-types-menu');
+                if (menu && !menu.contains(event.target)) {
+                    const dropdown = document.getElementById('password-types-dropdown');
+                    if (dropdown) {
+                        dropdown.classList.add('hidden');
+                    }
+                }
+            });
+        </script>
+    </footer>
+</body>
+</html>

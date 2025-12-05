@@ -1,0 +1,110 @@
+{% extends "layout/main.twig" %}
+
+{% block content %}
+<div class="p-8 max-w-6xl mx-auto">
+    <div class="mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <div>
+                <h2 class="text-4xl font-bold text-gray-800">{{ password_type.label }}</h2>
+                <p class="text-gray-600 mt-2">Type de mot de passe</p>
+            </div>
+            <div class="w-20 h-20 rounded-lg border-2 border-gray-300" 
+                 style="background-color: {{ password_type.color }};"></div>
+        </div>
+        <div class="flex gap-3">
+            <a href="{{ url('/password-types/' ~ password_type.id ~ '/edit') }}" 
+               class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition inline-flex items-center gap-2">
+                <i class="mdi mdi-pencil"></i> Modifier
+            </a>
+            <a href="{{ url('/password-types') }}" 
+               class="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition inline-flex items-center gap-2">
+                <i class="mdi mdi-arrow-left"></i> Retour
+            </a>
+        </div>
+    </div>
+
+    <div class="mb-8 flex justify-between items-center">
+        <h3 class="text-2xl font-bold text-gray-800">Champs du type</h3>
+        <a href="{{ url('/password-types/' ~ password_type.id ~ '/fields/create') }}" 
+           class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition inline-flex items-center gap-2">
+            <i class="mdi mdi-plus"></i> Ajouter un champ
+        </a>
+    </div>
+
+    {% if fields is empty %}
+        <div class="bg-gray-100 border border-gray-300 rounded-lg p-6 text-center">
+            <i class="mdi mdi-form-textbox text-gray-400 text-4xl block mb-2"></i>
+            <p class="text-gray-600">Aucun champ défini pour ce type.</p>
+            <a href="{{ url('/password-types/' ~ password_type.id ~ '/fields/create') }}" 
+               class="text-blue-600 hover:underline mt-2 inline-block">
+                Créer le premier champ
+            </a>
+        </div>
+    {% else %}
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+            <table class="w-full">
+                <thead>
+                    <tr class="bg-gray-100 border-b border-gray-300">
+                        <th class="text-left p-4 font-semibold text-gray-700"><i class="mdi mdi-form-textbox"></i> Nom du champ</th>
+                        <th class="text-left p-4 font-semibold text-gray-700"><i class="mdi mdi-label-outline"></i> Label</th>
+                        <th class="text-left p-4 font-semibold text-gray-700"><i class="mdi mdi-format-list-bulleted"></i> Type</th>
+                        <th class="text-left p-4 font-semibold text-gray-700"><i class="mdi mdi-cog"></i> Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for field in fields %}
+                        <tr class="border-b border-gray-200 hover:bg-gray-50 transition">
+                            <td class="p-4 font-semibold text-gray-800">
+                                <code class="bg-gray-100 px-2 py-1 rounded text-sm">{{ field.field_name }}</code>
+                            </td>
+                            <td class="p-4 text-gray-700">{{ field.field_label }}</td>
+                            <td class="p-4">
+                                <span class="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
+                                    {% if field.field_type == 'text' %}
+                                        <i class="mdi mdi-form-textbox"></i> Texte
+                                    {% elseif field.field_type == 'password' %}
+                                        <i class="mdi mdi-lock"></i> Mot de passe
+                                    {% elseif field.field_type == 'textarea' %}
+                                        <i class="mdi mdi-file-document"></i> Zone de texte
+                                    {% elseif field.field_type == 'email' %}
+                                        <i class="mdi mdi-email"></i> Email
+                                    {% elseif field.field_type == 'url' %}
+                                        <i class="mdi mdi-link"></i> URL
+                                    {% else %}
+                                        {{ field.field_type }}
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td class="p-4">
+                                <div class="flex gap-2">
+                                    <a href="{{ url('/password-types/' ~ password_type.id ~ '/fields/' ~ field.id ~ '/edit') }}" 
+                                       class="bg-yellow-500 hover:bg-yellow-600 text-white px-3 py-1 rounded text-sm transition inline-flex items-center gap-1">
+                                        <i class="mdi mdi-pencil"></i> Modifier
+                                    </a>
+                                    <form action="{{ url('/password-types/' ~ password_type.id ~ '/fields/' ~ field.id ~ '/delete') }}" 
+                                          method="POST" 
+                                          class="inline">
+                                        <button type="submit" 
+                                                class="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm transition inline-flex items-center gap-1"
+                                                onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce champ ?');">
+                                            <i class="mdi mdi-delete"></i> Supprimer
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h4 class="font-semibold text-blue-900 mb-2"><i class="mdi mdi-information-outline"></i> Résumé</h4>
+            <p class="text-blue-800 text-sm">
+                Ce type de mot de passe contient <strong>{{ fields|length }}</strong> champ(s).
+            </p>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "layout/main.twig" %}
+
+{% block content %}
+<section class="p-8 max-w-3xl mx-auto">
+  <h2 class="text-3xl font-bold mb-6 text-gray-800">{{ title }}</h2>
+
+  <!-- Sélection du type de mot de passe -->
+  <form method="GET" class="bg-white p-6 rounded-lg shadow-md mb-8">
+    <input type="hidden" name="project_id" value="{{ project_id }}">
+
+    <label for="password_type_id" class="block mb-2 font-semibold text-gray-700">Choisir le type :</label>
+    <select name="password_type_id" id="password_type_id" 
+            onchange="this.form.submit()" required
+            class="w-full border border-gray-300 rounded-lg p-2 focus:ring focus:ring-blue-300">
+      <option value="">-- Sélectionner un type --</option>
+      {% for password_type in password_types %}
+        <option value="{{ password_type.id }}" {% if selected_type == password_type.id %}selected{% endif %}>
+          {{ password_type.label }}
+        </option>
+      {% endfor %}
+    </select>
+  </form>
+
+  {% if selected_type %}
+    <!-- Formulaire d'ajout de mot de passe -->
+    <form action="{{ url('/projects/' ~ project_id ~ '/passwords') }}" method="POST"
+          class="bg-white p-6 rounded-lg shadow-md space-y-5" enctype="multipart/form-data">
+      <input type="hidden" name="project_id" value="{{ project_id }}">
+      <input type="hidden" name="password_type_id" value="{{ selected_type }}">
+  
+      <div>
+        <label for="label" class="block mb-2 font-semibold text-gray-700">Titre du mot de passe :</label>
+        <input type="text" id="label" name="label" required
+               class="w-full border border-gray-300 rounded-lg p-2 focus:ring focus:ring-blue-300">
+      </div>
+
+
+      {% for field in fields %}
+        <div>
+          <label for="{{ field.field_name }}" class="block mb-2 font-semibold text-gray-700">
+            {{ field.field_label }} :
+          </label>
+
+          {% if field.field_type == 'textarea' %}
+            <textarea id="{{ field.field_name }}" 
+                      name="extra[{{ field.field_name }}]" 
+                      required
+                      class="w-full border border-gray-300 rounded-lg p-2 focus:ring focus:ring-blue-300"></textarea>
+          {% else %}
+            <input type="{{ field.field_type }}" 
+                   id="{{ field.field_name }}" 
+                   name="extra[{{ field.field_name }}]" 
+                   required
+                   class="w-full border border-gray-300 rounded-lg p-2 focus:ring focus:ring-blue-300">
+          {% endif %}
+        </div>
+      {% endfor %}
+
+      <div>
+        <label class="block mb-2 font-semibold text-gray-700" for="multiple_files">Ajouter des fichiers</label>
+        <input class="cursor-pointer block w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring focus:ring-blue-300" name="files[]" id="multiple_files" type="file" multiple>
+      </div>
+
+      <div class="pt-4">
+        <button type="submit"
+                class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">
+          Ajouter le mot de passe
+        </button>
+      </div>
+    </form>
+  {% endif %}
+</section>
+{% endblock %}

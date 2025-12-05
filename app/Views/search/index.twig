@@ -1,0 +1,87 @@
+{% extends "layout/main.twig" %}
+
+{% block content %}
+
+<h1>Recherche</h1>
+
+<form method="GET" action="{{ url("/search") }}">
+    <input type="search" name="s" placeholder="Rechercher un mot de passe" value="{{ s }}">
+
+    <select name="project_id">
+        <option value="">Tous les projets</option>
+        {% for p in projects %}
+            <option value="{{p.id}}" {% if p.id == project_id %}selected{% endif %}
+            >{{p.name}}</option>
+        {% endfor %}
+    </select>
+
+    <select name="password_type_id">
+        <option value="">Tous les types</option>
+        {% for t in types %}
+            <option value="{{t.id}}" {% if t.id == type_id %}selected{% endif %}
+            >{{t.label}}</option>
+        {% endfor %}
+    </select>
+
+    <input type="submit" value="Go">
+</form>
+
+<hr>
+
+
+{% if results is empty %}
+    <p>Aucun resultat</p>
+{% else %}
+ 
+    <table class="w-full mt-6 border-collapse bg-white rounded-lg shadow">
+        <thead>
+            <tr class="bg-gray-100 text-left">
+            <th class="py-3 px-4">Projet</th>
+            <th class="py-3 px-4">Type</th>
+            <th class="py-3 px-4">Mot de passe</th>
+            <th class="py-3 px-4">Données</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in results %}
+                <tr>
+                    <td>{{ r.project_name }}</td>
+                    <td>{{ r.type_label }}</td>
+                    <td>{{ r.label }}</td>
+                    <td>
+                        {% for key, value in r.extra %}
+                            <div class="field-line">
+                            <div>
+                            <strong>{{ key }}</strong> : 
+                            <span class="hidden-value" style="display:none">
+                            {{value}}
+                            </span>
+                            <span class="hidden-mask">
+                                **********
+                            </span>
+                            </div>
+
+                            <button type="button"
+                                    class="toggle-btn"
+                                    onclick="toggleField(this)">
+                            Afficher
+                            </button>
+
+                            <button type="button"
+                                class="copy-btn"
+                                onclick="copyField(this)"
+                                data-value="{{ value }}">
+                                Copier
+                            </button>
+                            </div>
+                            
+                        {% endfor %}
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+    <table>
+{% endif %}
+
+{% endblock %}

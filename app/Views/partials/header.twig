@@ -1,0 +1,60 @@
+<header class="bg-gradient-to-r from-blue-600 to-blue-800 shadow-lg">
+    <nav class="flex items-center justify-between px-6 py-4 max-w-7xl mx-auto">
+        <div class="flex items-center gap-8">
+            <a href="{{ url('/') }}" class="text-2xl font-bold text-white hover:text-blue-100 transition">🔐 ProKey</a>
+            
+            {% if auth_user %}
+            <div class="hidden md:flex gap-6">
+                <a href="{{ url('/projects') }}" class="text-white hover:text-blue-100 transition flex items-center gap-2">
+                    <i class="mdi mdi-folder-multiple"></i> Projets
+                </a>
+                
+                {% if password_types %}
+                <div class="relative" id="password-types-menu">
+                    <button class="text-white hover:text-blue-100 transition flex items-center gap-2" onclick="togglePasswordTypesMenu(event)">
+                        <i class="mdi mdi-lock-multiple"></i> Types
+                        <i class="mdi mdi-chevron-down"></i>
+                    </button>
+                    <div id="password-types-dropdown" class="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-xl hidden z-50">
+                        {% for type in password_types %}
+                            <a href="{{ url('/password-types/' ~ type.id ~ '/fields') }}" 
+                               class="block px-4 py-2 text-gray-800 hover:bg-blue-100 transition first:rounded-t-lg">
+                                <i class="mdi mdi-tag"></i> {{ type.label }}
+                            </a>
+                        {% endfor %}
+                        <a href="{{ url('/password-types') }}" 
+                           class="block px-4 py-2 text-gray-800 hover:bg-blue-100 transition border-t border-gray-200 rounded-b-lg">
+                            <i class="mdi mdi-plus"></i> Gérer les types
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="flex items-center gap-6">
+            {% if auth_user %}
+                <div class="flex items-center gap-4">
+                <a href="{{ url('/me') }}" class="hover:underline">
+                    <span class="text-white flex items-center gap-2">
+                        <i class="mdi mdi-account-circle"></i> {{ auth_user.name }}
+                    </span>
+                </a>
+                    <a href="{{ url('/logout') }}" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition flex items-center gap-2">
+                        <i class="mdi mdi-logout"></i> Déconnexion
+                    </a>
+                </div>
+            {% else %}
+                <div class="flex items-center gap-3">
+                    <a href="{{ url('/login') }}" class="bg-white text-blue-600 px-6 py-2 rounded-lg hover:bg-gray-100 transition font-semibold flex items-center gap-2">
+                        <i class="mdi mdi-login"></i> Connexion
+                    </a>
+                    <a href="{{ url('/register') }}" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition font-semibold flex items-center gap-2">
+                        <i class="mdi mdi-account-plus"></i> Inscription
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </nav>  
+</header>

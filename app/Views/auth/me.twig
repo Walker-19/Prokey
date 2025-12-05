@@ -1,0 +1,21 @@
+{% extends "layout/main.twig" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<section class="p-10 max-w-2xl mx-auto bg-white rounded-xl shadow-md">
+  <h2 class="text-3xl font-bold mb-6 text-gray-800">{{ title }}</h2>
+
+  <div class="space-y-4 text-gray-700">
+    <p><strong>Nom :</strong> {{ user.name }}</p>
+    <p><strong>Email :</strong> {{ user.email }}</p>
+  </div>
+
+  <div class="mt-8">
+    <a href="{{ url('/projects') }}" 
+       class="inline-block bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition">
+      Accéder aux projets
+    </a>
+  </div>
+</section>
+{% endblock %}

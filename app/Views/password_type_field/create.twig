@@ -1,0 +1,46 @@
+{% extends "layout/main.twig" %}
+
+{% block content %}
+  <section class="p-8 max-w-2xl mx-auto">
+    <h2 class="text-3xl font-bold mb-6 text-gray-800">{{ title }}</h2>
+
+    <form action="{{ url('/password-types/' ~ password_type_id ~ '/fields/store') }}" 
+          method="POST"
+          class="space-y-5 bg-white p-6 rounded-lg shadow-md">
+
+      <div>
+        <label for="field_name" class="block mb-2 font-semibold text-gray-700">Nom du champ :</label>
+        <input type="text" id="field_name" name="field_name" 
+               required
+               class="w-full border border-gray-300 rounded-lg p-2 focus:ring focus:ring-blue-300">
+      </div>
+
+      <div>
+        <label for="field_label" class="block mb-2 font-semibold text-gray-700">Label du champ :</label>
+        <input type="text" id="field_label" name="field_label" 
+               required
+               class="w-full border border-gray-300 rounded-lg p-2 focus:ring focus:ring-blue-300">
+      </div>
+
+      <div>
+        <label for="field_type" class="block mb-2 font-semibold text-gray-700">Type de champ :</label>
+        <select id="field_type" name="field_type" required
+                class="w-full border border-gray-300 rounded-lg p-2 focus:ring focus:ring-blue-300">
+          <option value="text">Texte</option>
+          <option value="textarea">Texte long</option>
+          <option value="number">Nombre</option>
+          <option value="password">Mot de passe</option>
+          <option value="email">Email</option>
+          <option value="url">URL</option>
+        </select>
+      </div>
+
+      <div class="pt-4">
+        <button type="submit"
+                class="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition">
+          Ajouter le champ
+        </button>
+      </div>
+    </form>
+  </section>
+{% endblock %}
